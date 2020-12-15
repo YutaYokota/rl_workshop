@@ -1,22 +1,31 @@
 class MicropostsController < ApplicationController
   before_action :correct_user,   only: :destroy
   def index
-    @microposts = Microposts.all
+    @microposts = Micropost.all
+    render json: @microposts
   end
 
   def show
+    @micropost = Micropost.find(params[:id])
+    render json: @micropost
   end
 
   def create
-    @micropost = current_user.microposts.build(micropost_params)
+    @micropost = current_user.microposts.new(micropost_params)
     if @micropost.save
-      #投稿成功時の処理
+      render json: micropost, status: :created
     else
-      #投稿失敗時の処理
+      render json: { errors: micropost.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
+    @micropost = Micropost.find(params[:id])
+    if @micropost.update_attributes(micropost_params)
+      head :no_content
+    else
+      render json: { errors: micropost.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def destroy
